@@ -31,10 +31,10 @@ For example, to install it as a personal Codex skill:
 
 ```bash
 mkdir -p ~/.agents/skills
-git clone https://github.com/LEQfight/autodl-ssh-experiments.git ~/.agents/skills/autodl-ssh-experiments
+git clone https://github.com/LEQfight/autodl-agent-lab.git ~/.agents/skills/autodl-ssh-experiments
 ```
 
-Use the same `git clone` command with the Claude Code or Cursor personal path above for those tools. If the destination already exists, update that checkout instead of cloning over it. On Windows, `~` means your user home directory in the shell you use. Keep `SKILL.md` and `references/` together. If the skill is not discovered, refresh or restart the agent.
+Use the same `git clone` command with the Claude Code or Cursor personal path above for those tools. The GitHub project is called **AutoDL Agent Lab**; the skill folder and invocation name remain `autodl-ssh-experiments` for existing installations. If the destination already exists, update that checkout instead of cloning over it. On Windows, `~` means your user home directory in the shell you use. Keep `SKILL.md` and `references/` together. If the skill is not discovered, refresh or restart the agent.
 
 The installation paths and skill discovery behavior come from the official [Codex](https://learn.chatgpt.com/docs/build-skills), [Claude Code](https://code.claude.com/docs/en/skills), and [Cursor](https://cursor.com/help/customization/skills) documentation. Agent behavior still depends on the host's tool permissions and available shell/SSH access.
 
@@ -66,6 +66,10 @@ In Codex, you can explicitly mention `$autodl-ssh-experiments`; in Claude Code, 
 ## Scope and security
 
 This repository contains instructions, not models, datasets, experiment results, credentials, or a preconfigured server. Keep private keys, passwords, tokens, local SSH config, model files, datasets, and run outputs outside this repository. Check the model and dataset terms before sharing derived artifacts.
+
+## Contribute
+
+Improvements to AutoDL operations, reproducibility rules, and cross-agent installation are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for a focused contribution checklist. For a bug, include the agent host, AutoDL instance type, expected behavior, observed behavior, and a redacted reproduction.
 
 ## 中文简介
 

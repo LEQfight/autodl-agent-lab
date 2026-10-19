@@ -1,6 +1,7 @@
 ---
 name: autodl-ssh-experiments
-description: Plan and run reproducible large-language-model research on an AutoDL GPU instance through the SSH alias autodl. Use for remote setup, data or model preparation, training, inference, benchmarking, monitoring, and handoff.
+description: Run reproducible LLM research on AutoDL GPU instances over SSH. Use for remote project setup, versioned code and data preparation, detached training or evaluation, monitoring, recovery, and experiment handoff.
+license: MIT
 ---
 
 # AutoDL LLM research
