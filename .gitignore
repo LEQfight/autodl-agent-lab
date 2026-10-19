@@ -1,0 +1,27 @@
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_ed25519*
+ssh_config
+
+# Experiment outputs and large assets
+runs/
+outputs/
+checkpoints/
+models/
+datasets/
+cache/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# Tooling
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
