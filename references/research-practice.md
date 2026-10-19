@@ -1,57 +1,50 @@
-# Research and project practice
+# Research workflow and project engineering
 
-Use this guide when creating or substantially revising an experiment. Adapt it to the project's framework; do not install Hydra, DVC, MLflow, or another service solely to satisfy this guide.
+Use this guide when setting up or substantially revising a project. Apply only the stages needed for the requested LLM research: data preparation, fine-tuning, inference, evaluation, or analysis. Existing project conventions take priority when they already keep work traceable.
 
-## Organize by responsibility
+## Project structure
 
-Inspect existing conventions first. For a new project, a practical layout is:
+For a new project, use a small, documented layout:
 
 ```text
-/root/llm_safety_exp/<project>/
-  README.md                 # objective, setup, commands, artifact map
-  configs/                  # versioned source configs
-  src/ or scripts/          # preparation, training, inference, scoring
-  tests/                    # meaningful data/parser/smoke checks, when warranted
-  runs/<run_id>/            # resolved config, manifest, logs, metrics, report
+/root/llm_research/<project>/
+  README.md              # purpose, setup, commands, artifact map
+  configs/               # versioned source configurations
+  src/ or scripts/       # task-specific stages
+  tests/                 # checks for fragile transforms/parsers
 /root/autodl-tmp/<project>/
   datasets/  models/  envs/  cache/
-  runs/<run_id>/checkpoints/
+  runs/<run_id>/         # resolved config, manifest, logs, metrics, artifacts, report
 ```
 
-Keep the source repository, a particular run's small outputs, and large assets separate. Prefer one documented path convention and named configuration fields over hard-coded paths in several scripts. Do not commit model weights, raw large datasets, credentials, or generated caches. A shared external framework checkout may live in `/root/llm_safety_exp/vendor/` with a pinned commit. Avoid modifying vendor code when an extension or project-local wrapper will do.
+Inspect the existing repository and storage mount first. Choose one code root and one run/large-asset root; record both in the project README or configuration. These `/root` paths are defaults for standard root-user instances, not migration instructions; adapt them for another user or storage layout. Keep generated files out of source directories, large files out of Git, and each run's outputs together. Use project-local wrappers or extensions around a third-party framework; pin its revision and avoid editing vendored source when possible.
 
-## Specify and freeze the experiment
+**Primary method:** use the existing framework's native configuration, data format, and entry points. **Fallback when it cannot express the required input, metric, or inference behavior:** add a thin project-local adapter or script. Document the boundary and check the adapter on known examples. Use a simple project layout when starting from scratch; add orchestration or experiment-tracking services only when the project already uses them or their benefit justifies maintenance.
 
-- Record the question, hypothesis or replication target, baseline, planned comparison, primary metric and its direction, success criterion, compute budget, and stop condition before expensive execution. Use the paper's stated setting when claiming reproduction; document every departure.
-- Pin code commit or record a diff/patch if uncommitted; capture Python, CUDA, GPU, major package versions, training command, resolved config, seed, precision, and effective batch size. A seed improves comparability but does not guarantee bitwise reproducibility across all hardware and kernels.
-- Identify every model and dataset by source, repository/revision, license or usage constraint when relevant, local path, and hash or file manifest. Document selection/filtering, deduplication, label mapping, transformation code, class counts, and immutable train/validation/test membership. Check for overlap, including near duplicates when contamination would change the conclusion.
-- Keep source configs in version control. Save a resolved copy with each run, including command-line overrides and paths. Use a run ID linked across logs, metrics, reports, and checkpoints. Record status as planned/running/completed/failed/interrupted, with start/end time and exit code.
-- Distinguish an inference artifact (model/adapter plus tokenizer and base-model identity) from a resumable training checkpoint (optimizer, scheduler, RNG/recipe state where supported). Test loading the saved artifact before declaring success.
+## Reproducibility contract
 
-The minimum run record is a small machine-readable manifest at `runs/<run_id>/manifest.json` (or the project's equivalent): run ID and parent ID if retried; objective and baseline ID; status, UTC timestamps, exit code; code revision/dirty state; exact launch command; resolved config path and hash; environment fingerprint; model and dataset identities/revisions; split or input manifest hashes; log, checkpoint, prediction, metric, and report paths. Record unavailable fields explicitly rather than inventing values. Keep generated metrics and per-example predictions as separate files, linked by run ID.
+Before expensive execution, record the question, reproduction target or hypothesis, baseline, comparison, primary metric and direction, success condition, compute budget, and stopping rule. For an ablation, change one factor at a time unless a factorial design is planned. Keep the evaluation protocol comparable.
 
-## Build readable stages
+Pin the source commit; when running uncommitted code, save a diff or snapshot. Capture the command, resolved config and overrides, seed(s), precision, effective batch size when relevant, Python/CUDA/GPU and major package versions. A seed supports comparison but does not guarantee identical results across hardware and kernels.
 
-Keep ingestion, normalization, split creation, model setup, training, inference, and metric computation in distinct functions or entry points. Use a small documented schema for examples and predictions; validate required fields and allowed labels. Transform data deterministically and preserve original IDs for traceability. Make preparatory steps idempotent or version their outputs. Prefer clear names and a single source of truth for prompts, labels, and metric formulas.
+Identify models, tokenizers, datasets, and benchmarks by canonical source, revision, license or use restriction when relevant, local path, and hash or file manifest. Document sampling, filtering, deduplication, transformations, IDs, and split membership. Check contamination or overlap where it would invalidate a claim. Do not require labels or train/validation/test splits for a task that does not use them.
 
-Respect the selected framework's native configuration and data contract rather than forcing a parallel abstraction. For example, LLaMA-Factory registers custom datasets through `dataset_info.json` in its configured `dataset_dir`; keep that registry and the training YAML traceable in the project, while large dataset files may remain on the data disk.
+Keep a machine-readable record at `<run_dir>/manifest.json` or the project's equivalent: run and parent IDs, objective, status, UTC start/end time, exit code, code revision/dirty state, command, resolved config path/hash, environment fingerprint, input identities/revisions/hashes, and output paths. Mark unavailable fields as unavailable. Store metrics and per-example outputs separately, linked by run ID. Keep inference artifacts distinct from resumable checkpoints; the latter need optimizer, scheduler, RNG, or recipe state when supported.
 
-Start with a cheap end-to-end smoke run: inspect several prepared examples, train a few steps if applicable, save and reload an artifact, infer on a handful of inputs, and check scoring against a tiny hand-labeled case. Add automated checks for error-prone transformations or parsers; avoid tests that only repeat implementation text.
+## Checks and evaluation
 
-## Evaluate and report
+Separate ingestion, transformation, execution, inference, and scoring into understandable units. Give examples and predictions stable IDs, validate required fields and output shapes, and keep prompt templates and metric formulas in one place. Make preparation idempotent or version its outputs. A smoke check should exercise the shortest complete path needed for the task: inspect sample inputs, run a few steps or requests, reload any saved artifact, and score a tiny known case. Add focused checks for transformations or parsers that can silently change results.
 
-Lock the held-out evaluation set and metric before looking at final results. Tune prompts, thresholds, and hyperparameters on training/validation data; record any test-set inspection and treat later test-guided changes as exploratory. Version the evaluation protocol when the dataset, prompt, parser, or metric changes. Keep prompt formatting, generation settings, maximum tokens, answer extraction, and invalid-output policy identical across comparisons. Report numerator, denominator, sample size, and uncertainty or multiple seeds when the decision depends on small differences. For safety classification, include both harmful and benign examples when possible; report false-safe and false-unsafe behavior rather than ASR alone. Do not infer general safety from a small benchmark.
+**Primary method:** use the framework or benchmark's native evaluator when it implements the intended protocol. **Fallback when it lacks the required prompt, parsing, metric, or sample-level output:** use a standalone, versioned scorer. Validate the fallback against hand-checked examples and keep its inputs and outputs.
 
-Use a compact run report: setup and deviations; table or machine-readable metrics with metric definitions; loss or learning trace when relevant; representative successes, failures, and invalid outputs; resource use; artifact paths; unresolved limitations. A run is complete only when process outcome, saved artifact, reload/inference, and reported metric are verified. Otherwise label it partial.
+Freeze the final evaluation dataset and metric before comparing results. Tune on training/validation material when available. If a fixed benchmark has no validation split, treat test-guided changes as exploratory and disclose them. Version the protocol whenever inputs, prompts, chat template, decoding, parser, or metric change. For each metric, include its definition, numerator/denominator when applicable, sample count, invalid or missing output policy, and uncertainty or multiple seeds when small differences matter. Do not generalize beyond tested conditions.
 
-## Primary-source patterns behind this guide
+Finish with a concise report: setup, deviations, comparison, results, representative failures, resource use, artifact paths, and limitations. A process exit alone is insufficient: verify the relevant artifact can be loaded or inspected and the metric can be reconstructed. Label incomplete runs as partial.
 
-- [Hugging Face model cards](https://huggingface.co/docs/hub/model-cards) and [dataset cards](https://huggingface.co/docs/hub/datasets-cards): document provenance, intended use, data, and evaluation.
-- [Hydra run directories](https://hydra.cc/docs/configure_hydra/workdir/): retain per-run logs and resolved configuration.
-- [MLflow tracking](https://mlflow.org/docs/latest/tracking): group runs and capture parameters, metrics, code versions, and artifacts.
-- [DVC experiment management](https://doc.dvc.org/user-guide/experiment-management): associate parameters and metrics with code/data revisions while storing large assets outside Git.
-- [torchtune checkpointing](https://github.com/meta-pytorch/torchtune/blob/main/torchtune/training/checkpointing/_checkpointer.py): distinguish model output from training state needed for resume.
-- [EleutherAI lm-evaluation-harness task guide](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/docs/new_task_guide.md): make evaluation setup and split/metric choices explicit in shareable task configuration.
-- [EleutherAI lm-evaluation-harness interface](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/docs/interface.md): save evaluation settings and model inputs/outputs when interpreting scores.
-- [Hugging Face Trainer](https://huggingface.co/docs/transformers/main_classes/trainer): distinguish seeded sampling, deterministic debugging, and exact checkpoint continuation.
-- [LLaMA-Factory dataset documentation](https://github.com/hiyouga/LlamaFactory/blob/main/data/README.md): honor the framework's dataset registry and format instead of assuming every trainer accepts the same schema.
+## Primary sources
+
+- [Hugging Face model cards](https://huggingface.co/docs/hub/model-cards) and [dataset cards](https://huggingface.co/docs/hub/datasets-cards): provenance and documented evaluation.
+- [Hydra run directories](https://hydra.cc/docs/configure_hydra/workdir/) and [MLflow tracking](https://mlflow.org/docs/latest/tracking): per-run configurations, logs, parameters, metrics, and artifacts.
+- [DVC experiment management](https://doc.dvc.org/user-guide/experiment-management): connect parameters and metrics to code/data revisions without storing large assets in Git.
+- [torchtune checkpointing](https://github.com/meta-pytorch/torchtune/blob/main/torchtune/training/checkpointing/_checkpointer.py) and [Hugging Face Trainer](https://huggingface.co/docs/transformers/main_classes/trainer): distinguish inference outputs from resumable training state.
+- [EleutherAI lm-evaluation-harness task guide](https://github.com/EleutherAI/lm-evaluation-harness/blob/main/docs/new_task_guide.md): version and share the evaluation protocol.
