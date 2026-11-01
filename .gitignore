@@ -25,3 +25,4 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.pyc
+integrations/dsh-bridge/.state/

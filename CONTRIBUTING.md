@@ -5,7 +5,7 @@ AutoDL Agent Lab is an instruction-based Agent Skill. Changes should help an age
 ## What to include in a change
 
 - State the problem and the AutoDL or research scenario where it occurs. For a method change, identify the primary method, the condition that triggers its fallback, and what the agent should record.
-- Keep `SKILL.md` concise. Put detailed operational guidance in `references/remote-operations.md` and research design guidance in `references/research-practice.md`. Link new references from the entrypoint.
+- Keep `SKILL.md` concise. Put detailed operational guidance in `references/remote-operations.md`, research design guidance in `references/research-practice.md`, and delegation rules in `references/agent-orchestration.md`. Link new references from the entrypoint.
 - Preserve the `autodl-ssh-experiments` skill name and folder name unless a migration is planned. Update the README when installation or invocation changes.
 - Check that relative links work, the YAML frontmatter follows the [Agent Skills specification](https://agentskills.io/specification), and the example instructions can be followed with shell and SSH access alone.
 - Explain how you checked the change. For an AutoDL-specific claim, link the relevant official documentation or describe the instance behavior you observed.

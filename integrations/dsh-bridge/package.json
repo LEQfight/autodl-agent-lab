@@ -1,0 +1,13 @@
+{
+  "name": "autodl-agent-lab-dsh-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check": "node server.mjs --self-check",
+    "test": "node --test tests/bridge.test.mjs"
+  }
+}
