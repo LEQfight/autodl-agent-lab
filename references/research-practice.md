@@ -31,6 +31,12 @@ Identify models, tokenizers, datasets, and benchmarks by canonical source, revis
 
 Keep a machine-readable record at `<run_dir>/manifest.json` or the project's equivalent: run and parent IDs, objective, status, UTC start/end time, exit code, code revision/dirty state, command, resolved config path/hash, environment fingerprint, input identities/revisions/hashes, and output paths. Mark unavailable fields as unavailable. Store metrics and per-example outputs separately, linked by run ID. Keep inference artifacts distinct from resumable checkpoints; the latter need optimizer, scheduler, RNG, or recipe state when supported.
 
+## Resource-efficiency contract
+
+Before a costly GPU run, identify the method invariants that performance tuning must preserve, the throughput measure, the warmup boundary, and a method-appropriate utilization expectation. Save timestamped utilization samples and throughput with the run. Report per-GPU behavior when more than one GPU is allocated; an aggregate can hide an idle rank.
+
+Tune for the highest stable useful throughput that preserves the comparison. Prefer input-pipeline and framework-supported execution improvements. When changing microbatch size, preserve effective batch size with accumulation unless the experiment explicitly studies batch size, and verify that the resulting optimizer-step semantics remain equivalent. A performance retry is a new run with a parent link and a recorded reason; compare loss/correctness as well as speed. Treat a demonstrated method-bound bottleneck as a documented result, not an invitation to redesign the method for a prettier GPU graph.
+
 ## Checks and evaluation
 
 Separate ingestion, transformation, execution, inference, and scoring into understandable units. Give examples and predictions stable IDs, validate required fields and output shapes, and keep prompt templates and metric formulas in one place. Make preparation idempotent or version its outputs. A smoke check should exercise the shortest complete path needed for the task: inspect sample inputs, run a few steps or requests, reload any saved artifact, and score a tiny known case. Add focused checks for transformations or parsers that can silently change results.
@@ -39,7 +45,7 @@ Separate ingestion, transformation, execution, inference, and scoring into under
 
 Freeze the final evaluation dataset and metric before comparing results. Tune on training/validation material when available. If a fixed benchmark has no validation split, treat test-guided changes as exploratory and disclose them. Version the protocol whenever inputs, prompts, chat template, decoding, parser, or metric change. For each metric, include its definition, numerator/denominator when applicable, sample count, invalid or missing output policy, and uncertainty or multiple seeds when small differences matter. Do not generalize beyond tested conditions.
 
-Finish with a concise report: setup, deviations, comparison, results, representative failures, resource use, artifact paths, and limitations. A process exit alone is insufficient: verify the relevant artifact can be loaded or inspected and the metric can be reconstructed. Label incomplete runs as partial.
+Finish with a concise report: setup, deviations, comparison, results, representative failures, utilization/throughput summary, resource use, artifact paths, and limitations. A process exit alone is insufficient: verify the relevant artifact can be loaded or inspected and the metric can be reconstructed. Label incomplete runs as partial.
 
 ## Primary sources
 
