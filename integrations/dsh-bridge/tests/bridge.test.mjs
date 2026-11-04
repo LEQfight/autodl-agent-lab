@@ -27,7 +27,7 @@ test("delegated prompt includes policy and task", async () => {
   const prompt = await buildDelegatedPrompt("Create a smoke-test file.", "D:/work/repo");
   assert.match(prompt, /DSH worker contract/);
   assert.match(prompt, /Create a smoke-test file/);
-  assert.match(prompt, /ssh autodl/);
+  assert.match(prompt, /ssh <host-alias>/);
   assert.match(prompt, /Remote scope: none/);
 });
 

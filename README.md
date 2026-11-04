@@ -2,7 +2,7 @@
 
 **Make your AutoDL GPU instance a reproducible research workspace for AI coding agents.**
 
-An open Agent Skill for [Codex](https://learn.chatgpt.com/docs/build-skills), [Claude Code](https://code.claude.com/docs/en/skills), and [Cursor](https://cursor.com/help/customization/skills). Give the agent a research task; this skill guides it through SSH access, project setup, versioned code transfer, model and data preparation, detached jobs, monitoring, recovery, evaluation, and a traceable handoff. It can work directly, coordinate native subagents, or use DeepSeek Harness (DSH) as a local implementation worker. It uses the agent's shell and your `autodl` SSH alias; no remote Agent installation or task-specific training framework is required.
+An open Agent Skill for [Codex](https://learn.chatgpt.com/docs/build-skills), [Claude Code](https://code.claude.com/docs/en/skills), and [Cursor](https://cursor.com/help/customization/skills). Give the agent a research task; this skill guides it through SSH access, project setup, versioned code transfer, model and data preparation, detached jobs, monitoring, recovery, evaluation, and a traceable handoff. It can work directly, coordinate native subagents, or use DeepSeek Harness (DSH) as a local implementation worker. It uses the agent's shell and a distinct AutoDL SSH alias such as `H100-1-36542`; no remote Agent installation or task-specific training framework is required.
 
 > **One workflow, from research question to inspectable run.** The skill is a set of instructions and operating rules, not a hosted service or a claim that every experiment will succeed without intervention.
 
@@ -44,17 +44,17 @@ The installation paths and skill discovery behavior come from the official [Code
 Create your own SSH key, add its public key to the instance's `~/.ssh/authorized_keys`, and add an alias to your **local** SSH config (replace every placeholder):
 
 ```sshconfig
-Host autodl
+Host H100-1-36542
     HostName <your-instance-hostname>
     User <your-remote-user>
-    Port <your-ssh-port>
+    Port 36542
     IdentityFile <path-to-your-private-key>
     IdentitiesOnly yes
     BatchMode yes
     ConnectTimeout 10
 ```
 
-Check noninteractive access with `ssh autodl "true"`. Install `tmux` on the instance for long jobs. For a new root-user project, the suggested code root is `/root/llm_research/<project>`; an existing project keeps its own path. Inspect the instance's actual storage before using `/root/autodl-tmp/<project>` for large assets and run records. Adapt these paths for other users or mounts.
+Name each new or refreshed alias `<gpu-model>-<gpu-count>-<ssh-port>`. NVIDIA is the default vendor and is omitted, so one H100 on port `36542` is `H100-1-36542`, while one RTX 4080 on port `25762` is `4080-1-25762`. Replace the example port and alias together, then check noninteractive access with `ssh H100-1-36542 "true"`. If migrating from a generic `autodl` block, add and verify the canonical alias before retiring the old one. Install `tmux` on the instance for long jobs. For a new root-user project, the suggested code root is `/root/llm_research/<project>`; an existing project keeps its own path. Inspect the instance's actual storage before using `/root/autodl-tmp/<project>` for large assets and run records. Adapt these paths for other users or mounts.
 
 ## Run a research task
 
@@ -66,7 +66,7 @@ In Codex, you can explicitly mention `$autodl-ssh-experiments`; in Claude Code, 
 
 ## Optional DSH or native subagents
 
-Subagents are an execution option, not a requirement. If the host exposes a DSH headless/MCP bridge, the coordinating agent checks its status, sends one bounded task with an absolute allowlisted workspace, waits for the handoff, then independently reviews the Git diff and tests. If DSH is unavailable or unsuitable, it uses a native subagent; if delegation adds no value, it works directly. Agents remain local and reach AutoDL through the same `ssh autodl "command"` boundary.
+Subagents are an execution option, not a requirement. If the host exposes a DSH headless/MCP bridge, the coordinating agent checks its status, sends one bounded task with an absolute allowlisted workspace, waits for the handoff, then independently reviews the Git diff and tests. If DSH is unavailable or unsuitable, it uses a native subagent; if delegation adds no value, it works directly. Agents remain local and reach AutoDL through the same `ssh <host-alias> "command"` boundary.
 
 The bridge or host must keep model credentials outside the repository and should restrict DSH to explicit workspace roots. The skill relies on available task/status/resume capabilities and the contract in [agent orchestration](references/agent-orchestration.md). For Codex or another stdio-MCP host, this repository includes an [optional local DSH bridge](integrations/dsh-bridge/README.md); it is not required when the host already provides equivalent delegation tools.
 

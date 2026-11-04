@@ -11,7 +11,7 @@ Choose the smallest execution mode that fits the task.
 | Bounded implementation, test repair, or repository exploration | DSH through an available headless/MCP bridge | DSH is unavailable, unauthenticated, outside its workspace allowlist, or unsuitable for the task | Host-native subagent |
 | Independent review, research, or parallel read-only checks | Host-native subagent with a narrow deliverable | Native delegation is unavailable or the task is too small to justify a handoff | Coordinating agent performs it directly |
 | Several independent workstreams | Separate worktrees or disjoint file ownership | Isolation cannot be guaranteed | Run the workstreams sequentially |
-| Remote GPU execution | The assigned owner invokes `ssh autodl "command"` under this skill | Delegation is unavailable | Coordinating agent invokes the same command directly |
+| Remote GPU execution | The assigned owner invokes `ssh <host-alias> "command"` under this skill | Delegation is unavailable | Coordinating agent invokes the same command directly |
 
 Availability is a routing input, not a reason to weaken the workflow. Check a DSH bridge with its status tool before the first delegation. Do not assume a particular tool name; use the host's discovered DSH task/resume operations. A desktop-only session is not a substitute for verified headless authentication. Keep provider tokens in the user's credential store or private environment, never in the repository or delegated prompt.
 
@@ -25,6 +25,7 @@ Before granting write ownership, supply all fields that change what the worker m
 Objective: one observable outcome
 Workspace: absolute local repository/worktree
 Remote scope: none, read-only, or the exact authorized AutoDL operations
+AutoDL host alias: canonical `<gpu-model>-<gpu-count>-<ssh-port>` alias when remote scope is granted
 Allowed changes: files/directories and external systems
 Acceptance checks: commands plus expected artifacts or behavior
 Budget: time, tokens, network, and GPU limits when relevant

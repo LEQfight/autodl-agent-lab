@@ -6,7 +6,7 @@ license: MIT
 
 # AutoDL LLM research
 
-Use `ssh autodl "command"` for remote operations. Run long downloads, preprocessing, training, and evaluations in detached tmux sessions with durable logs. This skill applies across LLM tasks and frameworks; select only the stages the request needs.
+Resolve one SSH alias for the target instance before remote work. New or refreshed AutoDL aliases use `<gpu-model>-<gpu-count>-<ssh-port>`, omitting the NVIDIA vendor prefix; examples: `H100-1-36542` and `4080-1-25762`. Use `ssh <host-alias> "command"` consistently and record the alias with the project or run. Read [remote-operations.md](references/remote-operations.md) when creating, migrating, or repairing the connection. Run long downloads, preprocessing, training, and evaluations in detached tmux sessions with durable logs. This skill applies across LLM tasks and frameworks; select only the stages the request needs.
 
 Resolve the code root from the user's project or an existing repository. For a new root-user project, use one named directory under `/root/llm_research/` unless the user chooses another path. Inspect the instance's actual storage before placing run records and large assets under `/root/autodl-tmp/<project>/`. Keep code/configuration, run records, and large assets in their designated locations; preserve coherent existing conventions. Read [research-practice.md](references/research-practice.md) when designing a project, data pipeline, evaluation, or ablation.
 
